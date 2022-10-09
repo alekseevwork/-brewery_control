@@ -3,6 +3,7 @@ from flask_login import current_user, login_user, logout_user
 
 from webapp.user.forms import LoginForm
 from webapp.user.models import User
+from webapp.tank.models import Measuring
 
 blueprint = Blueprint('user', __name__)
     
@@ -36,3 +37,9 @@ def logout():
     logout_user()
 
     return render_template('base.html', title='render logout') # заглушка, пока нет главной страницы
+
+
+@blueprint.route('/')
+def home_page():
+    content = Measuring.query.all()
+    return render_template('home.html', title='Главная страница', context=content)

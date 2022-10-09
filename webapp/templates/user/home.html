@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">t°C</th>
+        <th scope="col">p°</th>
+        <th scope="col">Date</th>
+        <th scope="col">P</th>
+        <th scope="col">Comment</th>
+    </tr>
+    </thead>
+    {% for item in content %}
+    <tbody>
+    <tr>
+        <th scope="row">{{item.tank}}</th>
+        <td>{{item.temperature}}</td>
+        <td>{{item.density}}</td>
+        <td>{{item.create_at|date:"d-m H:m"}}</td>
+        <td>{{item.pressure}}</td>
+        <td>{{item.comment}}</td>
+    </tr>
+    </tbody>
+
+    {% endfor %}
+</table>
+{% endblock %}
