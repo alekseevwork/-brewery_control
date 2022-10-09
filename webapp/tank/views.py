@@ -45,7 +45,7 @@ def process_create_tank():
         db.session.commit()
         flash('ЦКТ добавлен')
 
-    return render_template('base.html', title='add tank')
+    return redirect(url_for('user.home_page'))
 
 
 @blueprint.route('/measuring')

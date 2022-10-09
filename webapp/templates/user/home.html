@@ -1,29 +1,43 @@
 {% extends "base.html" %}
-
 {% block content %}
-<table class="table">
-    <thead>
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">t°C</th>
-        <th scope="col">p°</th>
-        <th scope="col">Date</th>
-        <th scope="col">P</th>
-        <th scope="col">Comment</th>
-    </tr>
-    </thead>
-    {% for item in content %}
-    <tbody>
-    <tr>
-        <th scope="row">{{item.tank}}</th>
-        <td>{{item.temperature}}</td>
-        <td>{{item.density}}</td>
-        <td>{{item.create_at|date:"d-m H:m"}}</td>
-        <td>{{item.pressure}}</td>
-        <td>{{item.comment}}</td>
-    </tr>
-    </tbody>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="list-group">
+                <a class="list-group-item list-group-item-secondary">Активные ЦКТ:</a>
+                {% for item in content[1] %}
+                <a href="#" class="list-group-item list-group-item-dark ">
+                    {{ item }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">t°C</th>
+                        <th scope="col">p°</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">P</th>
+                        <th scope="col">Comment</th>
+                    </tr>
+                </thead>
+                {% for item in content[0] %}
+                <tbody>
+                    <tr>
+                        <th scope="row">{{item.tank}}</th>
+                        <td>{{item.temperature}}</td>
+                        <td>{{item.density}}</td>
+                        <td>{{item.create_at.strftime('%H:%M / %d.%m.%y')}}</td>
+                        <td>{{item.pressure}}</td>
+                        <td>{{item.comment}}</td>
+                    </tr>
+                </tbody>
 
-    {% endfor %}
-</table>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 
 from webapp.user.forms import LoginForm
 from webapp.user.models import User
-from webapp.tank.models import Measuring
+from webapp.tank.models import Measuring, Tank
 
 blueprint = Blueprint('user', __name__)
     
@@ -11,7 +11,7 @@ blueprint = Blueprint('user', __name__)
 def login():
     if current_user.is_authenticated:
 
-        return render_template('base.html', title='authenticated true') # заглушка, пока нет главной страницы
+        return redirect(url_for('user.home_page')) 
 
     page_title = 'Авторизация'
     login_form = LoginForm()
@@ -27,7 +27,7 @@ def process_login():
             login_user(user, remember=form.remember_me.data)
             flash('Вы успешно вошли на сайт')
 
-            return render_template('base.html', title='Login') # заглушка, пока нет главной страницы
+            return redirect(url_for('user.home_page'))
           
     flash('Неправильные имя или пароль')
     return redirect(url_for('user.login'))
@@ -36,10 +36,12 @@ def process_login():
 def logout():
     logout_user()
 
-    return render_template('base.html', title='render logout') # заглушка, пока нет главной страницы
+    return redirect(url_for('user.home_page'))
 
 
 @blueprint.route('/')
 def home_page():
-    content = Measuring.query.all()
-    return render_template('home.html', title='Главная страница', context=content)
+    measuring = Measuring.query.order_by(Measuring.create_at.desc()).all()
+    all_tanks = Tank.query.order_by(Tank.number).all()
+    return render_template('user/home.html', title='Последние измерения', 
+    content=[measuring, all_tanks])
