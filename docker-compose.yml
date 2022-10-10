@@ -25,8 +25,6 @@ services:
             do sleep 1;
             done;
             export FLASK_APP=webapp
-            && flask db init
-            && flask db migrate -m "init tabels"
             && flask db upgrade
             && export FLASK_ENV=development
             && flask run --host 0.0.0.0'
