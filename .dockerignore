@@ -1,5 +1,4 @@
 env/
-migrations/
 webapp/__pycache__
 docker-compose.yml
 Dockerfile
