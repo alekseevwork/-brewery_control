@@ -1,7 +1,7 @@
 from os import environ
 from dotenv import load_dotenv
-from telegram.ext import Updater, CommandHandler
-from webapp.bot.handler import view_tanks
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from handlers import view_full_tank_info, view_tanks
 import logging
 
 load_dotenv()
@@ -14,6 +14,7 @@ def main():
     dp = bot.dispatcher
     
     dp.add_handler(CommandHandler('start', view_tanks))
+    dp.add_handler(CallbackQueryHandler(view_full_tank_info))
 
     bot.start_polling()
     

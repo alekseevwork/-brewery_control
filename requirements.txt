@@ -37,5 +37,3 @@ Werkzeug==2.2.2
 WTForms==3.0.1
 zipp==3.8.1
 matplotlib==3.6.1
-python-telegram-bot==13.14
-
