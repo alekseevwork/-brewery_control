@@ -24,3 +24,4 @@ class TitleBeer(Enum):
             TitleBeer.cider: 'Пивной напиток',
         }
         return product[self]
+    
