@@ -13,8 +13,10 @@ from webapp.tank.utils import (
     is_beer_need_grooving,
     show_error_message,
     )
+from webapp.stock.models import Stock
+from webapp.stock.utils import get_needs_materials_for_brew_in_stock, is_stock_products, is_amount_yasts_in_stock
 from webapp.yeasts.models import Yeasts
-from webapp.yeasts.utils import get_the_right_yeasts, get_list_of_suitable_tanks, get_id_now_yeast
+from webapp.yeasts.utils import get_the_right_yeasts, get_list_of_suitable_tanks, get_id_now_yeast, get_need_yasts
 from webapp.user.decorators import brewer_required
 
 blueprint = Blueprint('tank', __name__, url_prefix='/tank')
@@ -29,6 +31,16 @@ def view_tank_info(tank_id):
     page_title = 'Информация по ЦКТ'
     
     return render_template('tank/tank_info.html', title=page_title, tank=tank, measuring=measuring, yeats=yeats)
+
+@blueprint.route('/delete/<int:tank_id>')
+@login_required
+def delete_tank(tank_id):
+    tank = Tank.query.get(tank_id)
+    db.session.delete(tank)
+    db.session.commit()
+    flash('ЦКТ удален')
+
+    return redirect(url_for('main.view_tanks'))
 
 
 @blueprint.route('/create-tank')
@@ -54,15 +66,45 @@ def process_create_tank():
         else:
             previous_brew_number = Tank.query.order_by(Tank.id.desc()).first().brew_number_last
         numbers_brew = number_of_brews_for_full_tank(form.number.data)
-
+        
+        materials_for_brew = get_needs_materials_for_brew_in_stock(form.title.data, numbers_brew, form.number.data)
+        errors = []
+        for material in materials_for_brew.keys():
+            try:
+                in_stock_product = Stock.query.filter(Stock.name_product == material).first().amount_product
+            except AttributeError:
+                in_stock_product = 0
+            is_product, count = is_stock_products(in_stock_product, materials_for_brew[material])
+            if is_product:
+                errors.append(f'Не хватает {count}кг {material}')
+ 
+        if errors:
+            for error in errors:
+                flash(error)
+            return redirect(url_for('stock.append_in_stock'))
+        else:
+            for material in materials_for_brew:
+                Stock.query.filter(Stock.name_product==material).\
+                    update({Stock.amount_product:Stock.amount_product - float(materials_for_brew[material])}, synchronize_session = False)
+                db.session.commit()
         now_id, generation = get_id_now_yeast(form.yeasts.data)
         name_yasts = get_the_right_yeasts(form.title.data)
-        if now_id == -1:
+        if now_id <= 0:
             generation = 0
-            flash('Нет подходящих дрожжей. Нужно использовать сухие')
+            add_generation = 1
+            amount_yasts = get_need_yasts(name_yasts, numbers_brew)
+            if is_amount_yasts_in_stock(amount_yasts, name_yasts.stock_name()):
+                if Stock.query.filter(Stock.name_product==name_yasts.stock_name()).count():
+                    Stock.query.filter(Stock.name_product==name_yasts.stock_name()).\
+                            update({Stock.amount_product:Stock.amount_product - float(amount_yasts)}, synchronize_session = False)
+                    flash('Нет подходящих дрожжей. Нужно использовать сухие')
+                    add_generation = 0
+            else:
+                flash(f'Не хватает {amount_yasts}кг {name_yasts.stock_name()}')
+                return redirect(url_for('stock.append_in_stock'))
         new_yeast = Yeasts(
             name = name_yasts,
-            cycles = generation + 1
+            cycles = generation + add_generation
         )
         db.session.add(new_yeast)
         db.session.commit()
@@ -74,11 +116,10 @@ def process_create_tank():
             expected_volume= numbers_brew * planned_expected_volume(form.number.data),
             brew_number_first = previous_brew_number + 1,
             brew_number_last = previous_brew_number + numbers_brew,
-            )   
+            ) 
         db.session.add(new_tank)
         db.session.commit()
         flash('ЦКТ добавлен')
-
     return redirect(url_for('tank.view_tank_info', tank_id = new_tank.id))
 
 

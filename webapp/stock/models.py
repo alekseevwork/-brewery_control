@@ -11,4 +11,4 @@ class Stock(db.Model):
 
     def __repr__(self) -> str:
         return f'{self.name_product} - {self.amount_product}кг.'
-        
+

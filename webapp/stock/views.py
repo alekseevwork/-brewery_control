@@ -32,7 +32,7 @@ def process_append_in_stock():
                 new_product = Stock(
                     type_product = form["type_product"][index],
                     name_product = form["name_product"][index],
-                    amount_product = int(form["amount_product"][index])
+                    amount_product = float(form["amount_product"][index])
                 )
 
                 db.session.add(new_product)
@@ -42,13 +42,12 @@ def process_append_in_stock():
             except IntegrityError:
                 db.session.rollback()
                 Stock.query.filter(Stock.name_product==form["name_product"][index]).\
-                    update({Stock.amount_product:int(form["amount_product"][index]) + Stock.amount_product}, synchronize_session = False)
+                    update({Stock.amount_product:float(form["amount_product"][index]) + Stock.amount_product}, synchronize_session = False)
                 db.session.commit()
                 flash('Обновлено')
 
             except DataError:
                 flash('Ошибка ввода')
-                return redirect(url_for('stock.append_in_stock'))
     
     return redirect(url_for('stock.append_in_stock'))
 
@@ -67,7 +66,7 @@ def get_choise_suitable_product():
 
 @blueprint.route('/stock-view')
 def stock_view():
-
+    
     page_title = 'Склад'
     content = Stock.query.order_by(Stock.type_product).all()
 

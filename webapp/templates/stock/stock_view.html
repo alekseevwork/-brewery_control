@@ -17,7 +17,7 @@
         <th scope="row"></th>
         <td>{{item.type_product.translate_name()}}</td>
         <td>{{item.name_product}}</td>
-        <td>{{item.amount_product}}</td>
+        <td>{{'%.1f' % item.amount_product}}</td>
     </tr>
     </tbody>
     {% endfor %}
